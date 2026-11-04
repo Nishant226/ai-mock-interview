@@ -1,0 +1,11 @@
+# Environment & Secrets
+.env
+*.env
+backend/.env
+frontend/.env
+
+# Dependencies & Build Files
+node_modules/
+dist/
+build/
+npm-debug.log*

@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  # 1. FastAPI Service
+  fastapi:
+    build: ./vision-service
+    container_name: vision-service_container
+    ports:
+      - "8000:8000"
+    environment:
+      - MONGO_URI=mongodb+srv://nishant73026_db_user:Nishant90840@cluster0.izb9n2l.mongodb.net/ai_interview_db?retryWrites=true&w=majority
+    networks:
+      - app-network
+
+  # 2. Node.js Express Backend Service
+  backend:
+    build: ./backend
+    container_name: node_backend_container
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - MONGO_URI=mongodb+srv://nishant73026_db_user:Nishant90840@cluster0.izb9n2l.mongodb.net/ai_interview_db?retryWrites=true&w=majority
+      - PISTON_API_URL=http://piston:2000/api/v2/execute
+    depends_on:
+      - piston
+      - fastapi
+    networks:
+      - app-network
+
+  # 3. Piston Local Sandbox Service
+  piston:
+    image: ghcr.io/engineer-man/piston
+    container_name: piston_sandbox_container
+    user: "0:0"
+    dns:                  # <--- Yeh naya block add karein
+      - 8.8.8.8
+      - 8.8.4.4
+    ports:
+      - "2000:2000"
+    privileged: true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - piston_data:/piston
+    networks:
+      - app-network
+
+  # 4. React Frontend Service
+  frontend:
+    build: ./frontend
+    container_name: react_frontend_container
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+      - fastapi
+    networks:
+      - app-network
+
+volumes:
+  piston_data:
+
+networks:
+  app-network:
+    driver: bridge
