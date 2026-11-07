@@ -131,7 +131,7 @@ export default function InterviewSetup({ token, onStartInterview }) {
 
       const authToken = token || localStorage.getItem('auth_token') || localStorage.getItem('token');
       const response = await axios.post(
-        '${API_URL}/api/interview/start',
+        `${API_URL}/api/interview/start`,
         payload,
         { headers: { Authorization: `Bearer ${authToken}` } }
       );

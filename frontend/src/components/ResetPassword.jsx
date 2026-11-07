@@ -15,17 +15,17 @@ export default function ResetPassword() {
   const handleResetSubmit = async (e) => {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
-      alert("Passwords match nahi kar rahe hain!");
+      alert("Passwords do not match!");
       return;
     }
 
     setLoading(true);
     try {
       const res = await axios.post(`${API_URL}/api/auth/reset-password/${token}`, { newPassword });
-      alert(res.data.message);
-      navigate('/'); // Password reset hone ke baad login page par bhej dega
+      alert(res.data.message || "Password updated successfully!");
+      navigate('/'); // Redirects to login page after successful reset
     } catch (err) {
-      alert(err.response?.data?.message || 'Password reset karne mein error aaya.');
+      alert(err.response?.data?.message || 'Error occurred while resetting password.');
     } finally {
       setLoading(false);
     }
@@ -35,11 +35,11 @@ export default function ResetPassword() {
     <div className="flex min-h-screen items-center justify-center bg-slate-50 px-5 font-sans">
       <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 shadow-xl">
         <h2 className="mb-2 text-2xl font-black text-slate-900">Reset Password 🔒</h2>
-        <p className="mb-6 text-sm text-slate-500">new password enter Here.</p>
+        <p className="mb-6 text-sm text-slate-500">Please enter your new password below.</p>
 
         <form onSubmit={handleResetSubmit} className="space-y-4">
           <div>
-            <label className="mb-1 block text-sm font-semibold text-slate-700">new  Password</label>
+            <label className="mb-1 block text-sm font-semibold text-slate-700">New Password</label>
             <input 
               type="password"
               required
@@ -65,9 +65,9 @@ export default function ResetPassword() {
           <button 
             type="submit"
             disabled={loading}
-            className="w-full rounded-xl bg-emerald-500 py-3 text-sm font-bold text-white transition hover:bg-emerald-600 cursor-pointer"
+            className="w-full rounded-xl bg-emerald-500 py-3 text-sm font-bold text-white transition hover:bg-emerald-600 cursor-pointer disabled:opacity-50"
           >
-            {loading ? 'Updating...' : 'Update Password'}
+            {loading ? 'Updating Password...' : 'Update Password'}
           </button>
         </form>
       </div>

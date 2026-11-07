@@ -11,7 +11,6 @@ import PreInterviewCheckModal from './PreInterviewCheckModal';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 const FASTAPI_URL = import.meta.env.VITE_FASTAPI_URL || 'http://localhost:8000';
 
-const FAST_API_ANALYZE_FRAME = '${FASTAPI_URL}/analyze-frame';
 
 export default function InterviewContainer({ interviewId, token, onInterviewComplete }) {
   const [interview, setInterview] = useState(null);
@@ -164,7 +163,7 @@ export default function InterviewContainer({ interviewId, token, onInterviewComp
       if (!imageSrc) return;
 
       try {
-        const res = await axios.post(FAST_API_ANALYZE_FRAME, { image: imageSrc });
+        const res = await axios.post(`${FASTAPI_URL}/analyze-frame`, { image: imageSrc });
         const data = res.data;
 
         if (data) {

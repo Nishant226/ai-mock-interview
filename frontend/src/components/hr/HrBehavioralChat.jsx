@@ -121,7 +121,7 @@ export default function HrBehavioralChat({ interview: initialInterview, setInter
           const imageSrc = webcamRef.current.getScreenshot();
           if (!imageSrc) return;
 
-          const response = await axios.post('${FASTAPI_URL}/analyze-frame', {
+          const response = await axios.post(`${FASTAPI_URL}/analyze-frame`, {
             image: imageSrc
           });
           
@@ -233,7 +233,7 @@ export default function HrBehavioralChat({ interview: initialInterview, setInter
         reader.onloadend = async () => {
           const base64Audio = reader.result;
           try {
-            const res = await axios.post('${FASTAPI_URL}/analyze-audio', {
+            const res = await axios.post(`${FASTAPI_URL}/analyze-audio`, {
               audio: base64Audio,
               transcriptText: answer,
               wordCount: wordCount,

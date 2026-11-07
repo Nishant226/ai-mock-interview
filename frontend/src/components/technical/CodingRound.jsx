@@ -119,7 +119,7 @@ export default function CodingRound({ interview: initialInterview, setInterview,
           const imageSrc = webcamRef.current.getScreenshot();
           if (!imageSrc) return;
 
-          const response = await axios.post('${FASTAPI_URL}/analyze-frame', {
+          const response = await axios.post(`${FASTAPI_URL}/analyze-frame`, {
             image: imageSrc
           });
 

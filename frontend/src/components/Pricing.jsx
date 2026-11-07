@@ -88,7 +88,7 @@ export default function Pricing({ token }) {
 
       // 1. Create Razorpay order on backend (Passing planType & amount explicitly)
       const { data } = await axios.post(
-        '${API_URL}/api/payment/create-order',
+        `${API_URL}/api/payment/create-order`,
         {
           amount: plan.price,
           userId: userId,
@@ -115,7 +115,7 @@ export default function Pricing({ token }) {
           try {
             // 3. Verify Payment on Backend (Passing planType & amount explicitly)
             const verifyRes = await axios.post(
-              '${API_URL}/api/payment/verify-payment',
+              `${API_URL}/api/payment/verify-payment`,
               {
                 razorpay_order_id: response.razorpay_order_id,
                 razorpay_payment_id: response.razorpay_payment_id,

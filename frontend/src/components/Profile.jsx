@@ -10,7 +10,7 @@ export default function Profile({ token }) {
 
   const fetchProfile = async () => {
     try {
-      const res = await axios.get('${API_URL}/api/auth/profile', {
+      const res = await axios.get(`${API_URL}/api/auth/profile`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.data.success) {
@@ -31,7 +31,7 @@ export default function Profile({ token }) {
   const handleActivatePack = async (packId) => {
     try {
       const userId = profile.id;
-      const res = await axios.post('${API_URL}/api/auth/activate-pack', {
+      const res = await axios.post(`${API_URL}/api/auth/activate-pack`, {
         userId,
         packId
       });
@@ -123,7 +123,7 @@ export default function Profile({ token }) {
         </div>
       ) : (
         <div className="p-8 text-center bg-slate-800/40 rounded-2xl border border-slate-800">
-          <p className="text-slate-400 mb-2">Aapke paas abhi koi active pack ledger mein nahi hai.</p>
+          <p className="text-slate-400 mb-2">You don't have any active pack in your ledger right now.</p>
           <a href="/pricing" className="inline-block mt-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl transition-all">
             Explore Pricing & Buy Packs 🛒
           </a>

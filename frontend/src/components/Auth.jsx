@@ -61,7 +61,7 @@ export default function Auth({ onLoginSuccess }) {
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
 
-      const res = await axios.post('${API_URL}/api/auth/social-login', {
+      const res = await axios.post(`${API_URL}/api/auth/social-login`, {
         email: user.email,
         username: user.displayName || user.email.split('@')[0],
         googleId: user.uid
@@ -91,7 +91,7 @@ export default function Auth({ onLoginSuccess }) {
     e.preventDefault();
     setForgotLoading(true);
     try {
-      const res = await axios.post('${API_URL}/api/auth/forgot-password', { email: forgotEmail });
+      const res = await axios.post(`${API_URL}/api/auth/forgot-password`, { email: forgotEmail });
       alert(res.data.message);
       setShowForgotModal(false);
       setForgotEmail('');

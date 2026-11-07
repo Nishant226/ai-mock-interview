@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  # 1. FastAPI Service
+  # 1. FastAPI Service (AI, OpenCV/MediaPipe)
   fastapi:
     build: ./vision-service
     container_name: vision-service_container
@@ -21,31 +21,13 @@ services:
     environment:
       - PORT=5000
       - MONGO_URI=mongodb+srv://nishant73026_db_user:Nishant90840@cluster0.izb9n2l.mongodb.net/ai_interview_db?retryWrites=true&w=majority
-      - PISTON_API_URL=http://piston:2000/api/v2/execute
+      - ONLINE_COMPILER_API_KEY=cd95c890b0c0a2ac4b0007ecfaf97867
     depends_on:
-      - piston
       - fastapi
     networks:
       - app-network
 
-  # 3. Piston Local Sandbox Service
-  piston:
-    image: ghcr.io/engineer-man/piston
-    container_name: piston_sandbox_container
-    user: "0:0"
-    dns:                  # <--- Yeh naya block add karein
-      - 8.8.8.8
-      - 8.8.4.4
-    ports:
-      - "2000:2000"
-    privileged: true
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - piston_data:/piston
-    networks:
-      - app-network
-
-  # 4. React Frontend Service
+  # 3. React Frontend Service
   frontend:
     build: ./frontend
     container_name: react_frontend_container
@@ -59,9 +41,6 @@ services:
       - fastapi
     networks:
       - app-network
-
-volumes:
-  piston_data:
 
 networks:
   app-network:

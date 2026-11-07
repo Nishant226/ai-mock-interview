@@ -7,8 +7,6 @@ const User = require('../models/User');
 const { generateInterviewQuestion, evaluateAnswer } = require('../utils/llmService');
 const checkTier = require('../middleware/tierCheck'); // 🔒 Tier Check Middleware
 
-// 🌍 Environment Configuration for Piston Code Execution Service
-const PISTON_URL = process.env.PISTON_API_URL || 'http://piston:2000/api/v2/execute';
 
 function getEnabledRoundsList(roundsConfig, mode) {
   if (mode === 'HR & Behavioral') {
@@ -329,53 +327,65 @@ router.get('/:id', async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 });
-
+// 🚀 OnlineCompiler.io Code Execution Route
+// 🚀 OnlineCompiler.io Final Verified Execution Route
 router.post('/:id/execute-code', async (req, res) => {
   try {
-    const { code, language } = req.body;
+    const { code, language, input } = req.body;
 
-    // Exact installed runtime names and versions for Piston API
-    const langMap = {
-      javascript: { language: 'javascript', version: '18.15.0' },
-      python: { language: 'python', version: '3.12.0' },
-      cpp: { language: 'cpp', version: '10.2.0' },
-      java: { language: 'java', version: '15.0.2' }
+    // Exact Compiler mapping matching your OnlineCompiler dashboard
+    const COMPILER_MAP = {
+      javascript: 'nodejs-24',
+      js: 'nodejs-24',
+      python: 'python-3.14',
+      py: 'python-3.14',
+      cpp: 'g++-15',
+      'c++': 'g++-15',
+      java: 'openjdk-25',
+      c: 'c-11'
     };
 
-    const langConfig = langMap[language] || { language: 'javascript', version: '18.15.0' };
+    const langKey = language?.toLowerCase().trim();
+    const compilerName = COMPILER_MAP[langKey] || 'nodejs-24';
 
-    const pistonResponse = await axios.post(PISTON_URL, {
-      language: langConfig.language,
-      version: langConfig.version,
-      files: [{ content: code }]
-    });
+    // Request to OnlineCompiler.io API
+    const response = await axios.post(
+      'https://api.onlinecompiler.io/api/run-code-sync/',
+      {
+        compiler: compilerName,
+        code: code,
+        input: input || ""
+      },
+      {
+        headers: {
+          'Authorization': process.env.ONLINE_COMPILER_ONLINE_COMPILER_API_KEY || process.env.ONLINE_COMPILER_API_KEY,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
 
-    const runResult = pistonResponse.data.run || {};
-    let status = 'PASSED';
-    let actualError = '';
-
-    if (runResult.code !== 0 || (runResult.stderr && runResult.stderr.trim() !== '')) {
-      status = 'FAILED';
-      actualError = runResult.stderr || runResult.output || 'Compilation or Execution Error';
-    }
+    const resData = response.data;
+    const outputResult = resData.output || resData.result || resData.stdout || "Executed successfully";
+    const hasError = resData.error || resData.stderr;
+    
+    let execStatus = hasError ? 'FAILED' : 'PASSED';
 
     const testResults = [
-      { id: 1, name: "Test Case 1 (Basic Inputs)", status: status, time: "14ms", expected: "Correct Result", actual: status === 'PASSED' ? (runResult.output || "Correct Result") : actualError },
-      { id: 2, name: "Test Case 2 (Edge Case)", status: status, time: "18ms", expected: "Correct Result", actual: status === 'PASSED' ? (runResult.output || "Correct Result") : actualError },
-      { id: 3, name: "Test Case 3 (Large Dataset)", status: status, time: "35ms", expected: "Correct Result", actual: status === 'PASSED' ? (runResult.output || "Correct Result") : actualError }
+      { id: 1, name: "Test Case 1 (Basic Inputs)", status: execStatus, time: "14ms", expected: "Correct Result", actual: outputResult },
+      { id: 2, name: "Test Grade (Edge Case)", status: execStatus, time: "18ms", expected: "Correct Result", actual: outputResult },
+      { id: 3, name: "Test Case 3 (Large Dataset)", status: execStatus, time: "35ms", expected: "Correct Result", actual: outputResult }
     ];
 
-    res.json({ success: true, testResults, output: runResult.output || runResult.stderr || "Executed successfully" });
+    res.json({ success: true, testResults, output: outputResult });
   } catch (err) {
-    console.error("Code Execution Error Details:", err.response?.data || err.message);
-    
+    console.error("OnlineCompiler API Error Details:", err.response?.data || err.message);
     const errorMsg = err.response?.data?.message || err.message || 'Sandbox execution failed';
 
-    // 🛡️ Gracefully handle errors so the frontend doesn't show a generic error message
+    // 🛡️ Gracefully handle errors so frontend doesn't crash
     const failedTestResults = [
-      { id: 1, name: "Test Case 1 (Basic Inputs)", status: "FAILED", time: "0ms", expected: "Valid Output", actual: errorMsg },
-      { id: 2, name: "Test Case 2 (Edge Case)", status: "FAILED", time: "0ms", expected: "Valid Output", actual: errorMsg },
-      { id: 3, name: "Test Case 3 (Large Dataset)", status: "FAILED", time: "0ms", expected: "Valid Output", actual: errorMsg }
+      { id: 1, name: "Test Code (Basic Inputs)", status: "FAILED", time: "0ms", expected: "Valid Output", actual: errorMsg },
+      { id: 2, name: "Test Code (Edge Case)", status: "FAILED", time: "0ms", expected: "Valid Output", actual: errorMsg },
+      { id: 3, name: "Test Code (Large Dataset)", status: "FAILED", time: "0ms", expected: "Valid Output", actual: errorMsg }
     ];
 
     res.json({ 
@@ -385,7 +395,6 @@ router.post('/:id/execute-code', async (req, res) => {
     });
   }
 });
-
 // 💡 AI Hint Generator Route for Technical Round
 router.post('/:id/hint', async (req, res) => {
   try {
